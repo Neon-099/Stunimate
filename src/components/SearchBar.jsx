@@ -6,12 +6,12 @@ const SearchBar = () => {
     const [search, setSearch] = useState('');
 
     return (
-        <div className='flex items-center '>
-            <div className='relative left-19'>
-                <Search/>
+        <div className='flex items-center relative'>
+            <div className='absolute left-3 z-10 text-gray-400'>
+                <Search size={20}/>
             </div>
             <input 
-                className='border rounded-md absolute px-11 '
+                className='border border-gray-300 rounded-md px-10 py-2 w-64 focus:outline-none focus:ring-2 focus:ring-red-300 focus:border-transparent'
                 type="text"
                 placeholder='Search anime...'
                 value={search}
