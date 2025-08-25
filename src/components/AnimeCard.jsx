@@ -1,7 +1,9 @@
 import React from 'react';
+import { Link } from 'react-router-dom';
 
-const AnimeCard = ({ anime, episodeNumber = "01", title, img, }) => {
+const AnimeCard = ({ anime, episodeNumber = "01", title, img, id }) => {
     return (
+        <Link to={`/details/${id}`} className="block">
         <div className="relative w-full h-80 bg-white rounded-lg shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
             {/* Left Section - Dark Grey Strip */}
             <div className="absolute left-0 top-0 w-16 h-full bg-gray-800 flex flex-col items-center justify-between py-4 z-10">
@@ -37,8 +39,10 @@ const AnimeCard = ({ anime, episodeNumber = "01", title, img, }) => {
                         </div>
                     </div>
                 </div>
+
             </div>
         </div>
+        </Link>
     );
 };
 
