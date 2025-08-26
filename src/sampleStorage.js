@@ -32,7 +32,7 @@ export const movies = [
     {
         id: 3,
         title: 'Anime 3',
-        description: 'Anime 3 description',
+        description: 'lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.',
         img: 'https://cdn.noitatnemucod.net/thumbnail/1366x768/100/33043b5bb1314a46d20f814dbe70f123.jpg',
         episodes: 10,
         status: 'Watching',
