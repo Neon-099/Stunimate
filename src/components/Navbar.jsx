@@ -23,19 +23,31 @@ const Navbar = () => {
     }, []);
 
     return (
-        <nav className={`p-4 flex justify-between items-center shadow-md w-full fixed top-0 z-50 transition-all duration-300 ${
+        <nav className={`p-4 shadow-md w-full fixed top-0 z-50 transition-all duration-300 ${
             scrolled ? 'bg-white/95 backdrop-blur-sm' : 'bg-white'
-        }`}> 
-            <div className="flex items-center gap-6">
-                <h1 className="text-2xl font-bold text-red-600">Stunimate</h1>
-                <SearchBar />
-            </div> 
-            <Link className='flex flex-col items-center gap-1 hover:text-red-600 transition-colors'>
-                <Radio size={20} />
-                <span className="text-sm">Watch2gether</span>
-            </Link>
-                
-            <button className='px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors font-medium'>Login</button>
+        }`}>
+            <div className="max-w-[1800px] mx-auto w-full flex items-center gap-10">
+                {/* Left: Brand */}
+                <Link to="/home" className="flex items-center gap-10">
+                    <h1 className="text-2xl font-bold text-red-600">Stunimate</h1>
+                </Link>
+
+                {/* Center: Search + Watch2gether */}
+                <div className="flex items-center gap-6 flex-1 justify-center">
+                    <SearchBar />
+                    <Link className='flex flex-col items-center gap-1 hover:text-red-600 transition-colors'>
+                        <Radio size={20} />
+                        <span className="text-sm">Watch2gether</span>
+                    </Link>
+                </div>
+
+                {/* Right: Auth button */}
+                <div className="ml-auto">
+                    <button className='px-6 py-2 bg-red-500 text-white rounded-md hover:bg-red-600 transition-colors font-medium'>
+                        Login
+                    </button>
+                </div>
+            </div>
         </nav>
     )
 }
