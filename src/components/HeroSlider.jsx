@@ -1,9 +1,9 @@
 import {useState, useEffect} from 'react';
 import {motion, AnimatePresence} from 'framer-motion';
-import {ChevronLeft, ChevronRight, Play} from 'lucide-react';
+import {ChevronLeft, ChevronRight, Play, CirclePlay, Clock, ClosedCaption} from 'lucide-react';
 import {movies} from '../sampleStorage.js';
 
-const HeroSlider = () => {
+const HeroSlider = (  ) => {
     const [index, setIndex] = useState(0);
     
     useEffect(() => {
@@ -23,7 +23,7 @@ const HeroSlider = () => {
     };
     
     return (
-        <div className='relative w-full h-[500px] overflow-hidden rounded-xl shadow-2xl'>
+        <div className='relative w-full h-[500px] overflow-hidden bg-[#28242c]'>
             <AnimatePresence mode="wait">
                 <motion.div
                     key={movies[index].id}
@@ -33,21 +33,38 @@ const HeroSlider = () => {
                     transition={{ duration: 0.5 }}
                     className="absolute inset-0"
                 >
+                    {/* Full-bleed background image */}
                     <img 
-                        className='w-full h-full object-cover'
+                        className='absolute inset-0 w-full h-full object-cover'
                         src={movies[index].img}
                         alt={movies[index].title}
                     />
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                    <div className="absolute bottom-45 left-16 right-0 p-8 text-white">
+                    {/* Soft overlays for readability without visible seams */}
+                    <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
+                    <div className="absolute inset-0 bg-gradient-to-r from-[#28242c]/20 via-transparent to-[#28242c]/10" />
+                    <div className="absolute bottom-55 left-16 right-0 p-8 text-white">
                         <h2 className="text-4xl font-bold mb-2">{movies[index].title}</h2>
                         <p className="text-lg opacity-90 text-sm pr-3">{movies[index].description || 'Amazing anime content'}</p>
                     </div>
-                    <div className='absolute bottom-30 left-27 rounded-lg bg-red-600 p-3 flex flex-row text-white px-3 gap-2'>
+                    <div className='absolute bottom-42 left-22 rounded-lg  p-3 flex flex-row text-white px-3 gap-2'>
+                        <div className='flex flex-row'>
+                            <CirclePlay />
+                            <p className='font-bold px-1'>TV</p>
+                        </div>
+                        <div className='flex flex-row px-1'>
+                            <Clock />
+                            <p className='font-bold px-1'>{movies[index].duration || '24m'}</p>
+                        </div>
+                        <div className='flex flex-row'>
+                            <ClosedCaption />
+                            <p className='font-bold px-1'>{movies[index].episodes || '11'}</p>
+                        </div>
+                    </div>
+                    <div className='absolute bottom-25 left-25 rounded-lg bg-red-600 p-3 flex flex-row text-white px-3 gap-2'>
                         <Play />
                         <button >Watch now</button>
                     </div>
-                    <div className='absolute bottom-30 left-67 rounded-lg bg-red-600 p-3 flex flex-row text-white px-3 gap-2'>
+                    <div className='absolute bottom-25 left-67 rounded-lg bg-red-600 p-3 flex flex-row text-white px-3 gap-2'>
                         <button>Details</button>
                         <ChevronRight />
                     </div>

@@ -63,7 +63,7 @@ const Details = () => {
 						</div>
 
 						{/* Description */}
-						<p className="leading-7 text-gray-700 mb-5 pr-27">
+						<p className="text-lg  text-gray-700 mb-5 pr-27">
 							{anime.description}
 						</p>
 

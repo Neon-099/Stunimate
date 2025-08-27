@@ -1,12 +1,15 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 
-const AnimeCard = ({ anime, episodeNumber = "01", title, img, id }) => {
+const TrendingAnimeCard = ({ anime, episodeNumber = "01", title, img, id }) => {
     return (
-        <Link to={`/details/${id}`} className="block">
-        <div className="relative w-full h-80 bg-white rounded-lg shadow-lg overflow-hidden group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+        <div className="block cursor-pointer">
+            
+       
+        
+        <div className="relative w-full h-80  overflow-hidden ">
             {/* Left Section - Dark Grey Strip */}
-            <div className="absolute left-0 top-0 w-16 h-full bg-gray-800 flex flex-col items-center justify-between py-4 z-10">
+            <div className="absolute left-0 top-0 w-10 bg-[#28242c] h-full flex flex-col items-center justify-between py-4 z-10">
                 {/* Vertical Title */}
                 <div className="transform -rotate-90 origin-center whitespace-nowrap mt-50">
                     <h3 className="text-white text-sm font-semibold tracking-wider">
@@ -19,13 +22,13 @@ const AnimeCard = ({ anime, episodeNumber = "01", title, img, id }) => {
                     {episodeNumber.toString().padStart(2, '0')}
                 </div>
             </div>
-            
+            <Link to={`/details/${id}`} className='group hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1' >
             {/* Right Section - Main Poster Image */}
-            <div className="ml-16 h-full">
+            <div className=" h-full">
                 <img 
                     src={img} 
                     alt={title}
-                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                    className="w-full h-full object-cover flex justify-center items-center group-hover:scale-105 transition-transform duration-300 "
                 />
                 
                 {/* Overlay on hover */}
@@ -41,9 +44,11 @@ const AnimeCard = ({ anime, episodeNumber = "01", title, img, id }) => {
                 </div>
 
             </div>
+            </Link> 
+        
         </div>
-        </Link>
+        </div>
     );
 };
 
-export default AnimeCard;
+export default TrendingAnimeCard;
