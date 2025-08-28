@@ -131,6 +131,7 @@ const Home = () => {
                         </div>
                         
                     </div>
+
                     {/* Latest Episode with Genres Sidebar */}
                     <div className="mt-12 xl:grid  xl:grid-cols-4 gap-8 items-start">
                         <div className="xl:col-span-3">
@@ -149,6 +150,7 @@ const Home = () => {
                                             transition={{ duration: 0.3 }}
                                             key={`latest-${index}`}>
                                             <AnimeCard 
+                                                id={anime.id}
                                                 title={anime.title} 
                                                 img={anime.img}
                                                 description={anime.description}
