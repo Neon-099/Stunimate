@@ -3,6 +3,7 @@ import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
 import { useParams, Link } from 'react-router-dom';
 import { movies } from '../sampleStorage.js';
+import AnimeCard from '../components/AnimeCard.jsx';
 
 const Details = () => {
 	const { id } = useParams();
@@ -10,7 +11,7 @@ const Details = () => {
 
 	if (!anime) {
 		return (
-			<div className="min-h-screen bg-gray-50 text-gray-800 p-6">
+			<div className="min-h-screen  text-gray-800 p-6">
 				<div className="max-w-[1800px] mx-auto">
 					<Link to="/home" className="text-blue-600 hover:underline">Back</Link>
 					<div className="mt-8">Anime not found.</div>
@@ -20,7 +21,7 @@ const Details = () => {
 	}
 
 	return (
-		<div className="min-h-screen bg-gray-50 text-gray-800">
+		<div className="min-h-screen  text-gray-800">
             <Navbar />
 			<div className="max-w-[1800px] mx-auto px-4 py-26">
 				{/* Main content area */}
@@ -35,19 +36,19 @@ const Details = () => {
 					</div>
 
 					{/* Main content column */}
-					<div>
+					<div className='text-white'>
 						{/* Header breadcrumbs */}
-						<div className="text-sm text-gray-500 mb-3">
+						<div className="text-sm  mb-3">
 							<Link to="/home" className="hover:underline">Home</Link>
 							<span className="mx-2">/</span>
-							<span className="text-gray-700">{anime.title}</span>
+							<span>{anime.title}</span>
 						</div>
 
 						{/* Title */}
 						<h1 className="text-3xl md:text-4xl font-bold mb-2">{anime.title}</h1>
 
 						{/* Meta row */}
-						<div className="flex items-center gap-2 mb-4 text-sm text-gray-600">
+						<div className="flex items-center gap-2 mb-4 text-sm ">
 							<span className="px-2 py-0.5 border rounded">TV</span>
 							<span>{anime.duration || '24m'}</span>
 						</div>
@@ -63,12 +64,12 @@ const Details = () => {
 						</div>
 
 						{/* Description */}
-						<p className="text-lg  text-gray-700 mb-5 pr-27">
+						<p className="text-lg text-white mb-5 pr-27">
 							{anime.description}
 						</p>
 
 						{/* Share row */}
-						<div className="flex items-center gap-3 text-sm text-gray-600">
+						<div className="flex items-center gap-3 text-sm ">
 							<span>Share</span>
 							<a href="#" className="px-2 py-1 rounded bg-blue-600 text-white">Fb</a>
 							<a href="#" className="px-2 py-1 rounded bg-sky-500 text-white">X</a>
@@ -102,23 +103,17 @@ const Details = () => {
 					<div className="lg:col-span-3">
 						<h2 className="text-2xl font-bold text-orange-500 mb-6">Recommended for you</h2>
 						<div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-							{movies.slice(0, 20).map((movie) => (
-								<div key={movie.id} className="relative group">
-									<img 
-										src={movie.img} 
-										alt={movie.title} 
-										className="w-full h-70 object-cover rounded shadow-md group-hover:blur-2  duration-200" 
-									/>
-									<div className="absolute top-1 left-2 bg-green-500 text-white text-xs px-2 py-1 rounded">
-										{movie.id}
-									</div>
-									<div className="absolute top-2 right-2 bg-pink-500 text-white text-xs px-2 py-1 rounded">
-										{movie.id}
-									</div>
-									<div className="mt-2">
-										<h3 className="text-sm font-medium truncate">{movie.title}</h3>
-										<p className="text-xs text-gray-500">{movie.type || 'TV'} • {movie.duration || '24m'}</p>
-									</div>
+							{movies.slice(0, 20).map((anime, index) => (
+								<div key={index} className="relative group">
+									<AnimeCard 
+										id={anime.id}
+										title={anime.title} 
+										img={anime.img}
+										description={anime.description}
+										duration={anime.duration || '24m'}
+										status={anime.status || 'Currently Airing'}
+										genres={anime.genre || []}
+										/>
 								</div>
 							))}
 						</div>
