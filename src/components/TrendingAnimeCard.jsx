@@ -4,9 +4,6 @@ import { Link } from 'react-router-dom';
 const TrendingAnimeCard = ({ anime, episodeNumber = "01", title, img, id }) => {
     return (
         <div className="block cursor-pointer">
-            
-       
-        
         <div className="relative w-full h-80  overflow-hidden ">
             {/* Left Section - Dark Grey Strip */}
             <div className="absolute left-0 top-0 w-10 bg-[#28242c] h-full flex flex-col items-center justify-between py-4 z-10">

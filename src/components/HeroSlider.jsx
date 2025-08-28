@@ -1,9 +1,10 @@
 import {useState, useEffect} from 'react';
 import {motion, AnimatePresence} from 'framer-motion';
+import { Link } from 'react-router-dom';
 import {ChevronLeft, ChevronRight, Play, CirclePlay, Clock, ClosedCaption} from 'lucide-react';
 import {movies} from '../sampleStorage.js';
 
-const HeroSlider = (  ) => {
+const HeroSlider = ( {} ) => {
     const [index, setIndex] = useState(0);
     
     useEffect(() => {
@@ -23,7 +24,7 @@ const HeroSlider = (  ) => {
     };
     
     return (
-        <div className='relative w-full h-[500px] overflow-hidden bg-[#28242c]'>
+        <div className='relative w-full h-[900px] bg-[#28242c]'>
             <AnimatePresence mode="wait">
                 <motion.div
                     key={movies[index].id}
@@ -40,8 +41,6 @@ const HeroSlider = (  ) => {
                         alt={movies[index].title}
                     />
                     {/* Soft overlays for readability without visible seams */}
-                    <div className="absolute inset-0 bg-gradient-to-t from-black/45 via-transparent to-transparent" />
-                    <div className="absolute inset-0 bg-gradient-to-r from-[#28242c]/20 via-transparent to-[#28242c]/10" />
                     <div className="absolute bottom-55 left-16 right-0 p-8 text-white">
                         <h2 className="text-4xl font-bold mb-2">{movies[index].title}</h2>
                         <p className="text-lg opacity-90 text-sm pr-3">{movies[index].description || 'Amazing anime content'}</p>
@@ -62,12 +61,12 @@ const HeroSlider = (  ) => {
                     </div>
                     <div className='absolute bottom-25 left-25 rounded-lg bg-red-600 p-3 flex flex-row text-white px-3 gap-2'>
                         <Play />
-                        <button >Watch now</button>
+                        <Link to='' >Watch now</Link>
                     </div>
-                    <div className='absolute bottom-25 left-67 rounded-lg bg-red-600 p-3 flex flex-row text-white px-3 gap-2'>
-                        <button>Details</button>
+                    <Link to={`/details/${movies[index].id}`} className='absolute bottom-25 left-67 rounded-lg bg-red-600 p-3 flex flex-row text-white px-3 gap-2'>
+                        <button >Details</button>
                         <ChevronRight />
-                    </div>
+                    </Link >
                
                 </motion.div>
             </AnimatePresence>
