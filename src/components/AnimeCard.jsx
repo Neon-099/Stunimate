@@ -1,7 +1,9 @@
 import React from 'react';
+import {Link } from 'react-router-dom';
 import { Play, Plus } from 'lucide-react';
 
 const AnimeCard = ({
+    id,
     title,
     img,
     description,
@@ -16,24 +18,33 @@ const AnimeCard = ({
     genres = [],
 }) => {
     return (
-        <div className="group relative rounded-xl overflow-visible bg-gray-900/40  ">
+        <div className="group relative rounded-xl overflow-visible block cursor-pointer">
             {/* Poster */}
-            <div className="aspect-[3/4] w-full overflow-hidden">
-                <img
-                    src={img}
-                    alt={title}
-                    className="h-full w-full object-cover transition duration-300 group-hover:blur-sm group-hover:scale-105"
-                    loading="lazy"
-                />
-                
-            </div>
-            <div className="mt-2">
-                    <h3 className="text-sm font-medium truncate">{title}</h3>
-                    <p className="text-xs text-gray-500">{type || 'TV'} • {duration || '24m'}</p>
+                <div className="aspect-[3/4] w-full overflow-hidden">
+                    <img
+                        src={img}
+                        alt={title}
+                        className="h-full w-full object-cover transition duration-300 group-hover:blur-sm group-hover:scale-105"
+                        loading="lazy"
+                    />
+                    
+                    {/* Play button overlay */}
+                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                        <div className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full cursor-pointer transform scale-75 group-hover:scale-100 transition-all duration-300">
+                            <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
+                                <path d="M8 5v14l11-7z"/>
+                            </svg>
+                        </div>
+                    </div>
+                    
                 </div>
+            <div className="mt-2">
+                <h3 className="text-sm text-white font-medium truncate">{title}</h3>
+                <p className="text-xs text-white">{type || 'TV'} • {duration || '24m'}</p>
+            </div>
             {/* Hover dialog - floating card */}
             <div className="pointer-events-none group-hover:pointer-events-auto hover:pointer-events-auto absolute inset-0 opacity-0 group-hover:opacity-100 hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300 z-20">
-                <div className="absolute left-full ml-4 top-1/2 -translate-y-1/2 max-w-md bg-gray-900/80 backdrop-blur-md text-gray-100 shadow-2xl border border-white/10 p-4 md:p-5 translate-x-2 group-hover:translate-x-0 transition-transform duration-300">
+                <div className="absolute ml-4 left-29 top-[25rem] -translate-y-1/1 max-w-md bg-gray-900/80 backdrop-blur-md text-gray-100 shadow-2xl border border-white/10 p-4 md:p-5 translate-x-2 group-hover:translate-x-0 transition-transform duration-300">
                     <h3 className="text-lg font-semibold mb-2">{title}</h3>
 
                     {/* Badges row */}
@@ -85,10 +96,10 @@ const AnimeCard = ({
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <button className="pointer-events-auto flex  items-center gap-2 rounded-full bg-amber-500 hover:bg-amber-600 text-black font-semibold px-20 py-1 shadow">
+                        <Link to={`/details/${id}`} className="pointer-events-auto flex  items-center gap-2 rounded-full bg-amber-500 hover:bg-amber-600 text-black font-semibold px-20 py-1 shadow">
                             <Play size={16} fill="currentColor" className="-ml-1" />
                             Watch
-                        </button>
+                        </Link>
                         <button className="pointer-events-auto inline-flex items-center justify-center rounded-full w-9 h-9 bg-gray-700 hover:bg-gray-600 shadow">
                             <Plus size={18} className="text-white" />
                         </button>
