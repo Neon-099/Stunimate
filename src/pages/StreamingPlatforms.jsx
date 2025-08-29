@@ -24,7 +24,7 @@ const StreamingPlatforms = () => {
     const [isFullscreen, setIsFullscreen] = useState(false);
     const [showControls, setShowControls] = useState(true);
     const [playBackSpeed, setPlayBackSpeed] = useState(1);
-    const [quality, setQuality] = useState('720p');
+    const [showQuality, setShowQuality] = useState('720p');
     const [showSettings, setShowSettings] = useState(false);
     const [showSpeed, setShowSpeed] = useState(false);
     const [captionsEnabled, setCaptionsEnabled] = useState(false);
@@ -80,11 +80,62 @@ const StreamingPlatforms = () => {
         return () => clearInterval(interval);
     }, [isPlaying, isBuffering, duration, playBackSpeed]);
 
+    const togglePlay = ()=> {
+        setIsPlaying(!isPlaying);
+        resetControlsTimeout();
+    }
+
     const handleProgressChange = (e ) => {
         if(progressRef.current) {
-            
+            const rect = progressRef.current.getBoundingClientRect();
+            const x = e.clientX - rect.left;
+            const newTime = (clickX / rect.width) * duration;
+            setCurrentTime(Math.max(0, Math.min(newTime, duration)));
         }
     }
+
+    const handleVolumeChange = (e) => {
+        const newVolume = parseFloat(e.target.value);
+        setVolume(newVolume);
+        setIsMuted(newVolume === 0);
+    }
+
+    const toggleMute = () => {
+        setIsMuted(!isMuted);
+    };
+
+    const toggleFullscreen = () => {
+        setIsFullscreen(!isFullscreen);
+    }
+
+    const skipTime = (seconds) => {
+        setCurrentTime(prev => Math.max(0, Math.min(prev + seconds, duration)));
+    }
+
+    const changePlayBackSpeed = (speed) => {
+        setPlayBackSpeed(speed);
+        setShowSpeed(false);
+    }
+
+    const changeQuality = (qual) => {
+        setQuality(qual);
+        setShowQuality(false);  
+        setIsBuffering(true);
+        setTimeout(() => setIsBuffering(false), 1500);
+    }
+
+    return (
+        <div
+            ref={containerRef}
+            className={`relative bg-black ${isFullscreen ? 'fixed inset-0 z-50' : 'w-full max-w-6xl mx-auto'} overflow-hidden rounded-lg shadow-2xl`}
+            onMouseMove={resetControlsTimeout}
+            onMouseEnter={() => setShowControls(true)}
+            onMouseLeave={() => isPlaying && setShowControls(false)}
+            >
+            
+            
+        </div>
+    )
 }
 
 
