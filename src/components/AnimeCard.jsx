@@ -19,6 +19,8 @@ const AnimeCard = ({
 }) => {
     return (
         <div className="group relative rounded-xl overflow-visible block cursor-pointer">
+            <Link to={`/details/${id}`}>
+            
             {/* Poster */}
                 <div className="aspect-[3/4] w-full overflow-hidden">
                     <img
@@ -29,7 +31,7 @@ const AnimeCard = ({
                     />
                     
                     {/* Play button overlay */}
-                    <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                    <div className="absolute inset-0 flex items-center justify-center bottom-10 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                         <div className="bg-red-600 hover:bg-red-700 text-white p-3 rounded-full cursor-pointer transform scale-75 group-hover:scale-100 transition-all duration-300">
                             <svg className="w-6 h-6" fill="currentColor" viewBox="0 0 24 24">
                                 <path d="M8 5v14l11-7z"/>
@@ -41,7 +43,7 @@ const AnimeCard = ({
             <div className="mt-2">
                 <h3 className="text-sm text-white font-medium truncate">{title}</h3>
                 <p className="text-xs text-white">{type || 'TV'} • {duration || '24m'}</p>
-            </div>
+            </div></Link>
             {/* Hover dialog - floating card */}
             <div className="pointer-events-none group-hover:pointer-events-auto hover:pointer-events-auto absolute inset-0 opacity-0 group-hover:opacity-100 hover:opacity-100 focus-within:opacity-100 transition-opacity duration-300 z-20">
                 <div className="absolute ml-4 left-29 top-[25rem] -translate-y-1/1 max-w-md bg-gray-900/80 backdrop-blur-md text-gray-100 shadow-2xl border border-white/10 p-4 md:p-5 translate-x-2 group-hover:translate-x-0 transition-transform duration-300">
