@@ -1,4 +1,5 @@
 import React from 'react';
+
 import {Link } from 'react-router-dom';
 import { Play, Plus } from 'lucide-react';
 
@@ -98,7 +99,7 @@ const AnimeCard = ({
                     </div>
 
                     <div className="flex items-center gap-3">
-                        <Link to={`/details/${id}`} className="pointer-events-auto flex  items-center gap-2 rounded-full bg-amber-500 hover:bg-amber-600 text-black font-semibold px-20 py-1 shadow">
+                        <Link to={`/streaming/${id}`} className="pointer-events-auto flex  items-center gap-2 rounded-full bg-amber-500 hover:bg-amber-600 text-black font-semibold px-20 py-1 shadow">
                             <Play size={16} fill="currentColor" className="-ml-1" />
                             Watch
                         </Link>
