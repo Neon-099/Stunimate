@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import {ChevronLeft, ChevronRight, Play, CirclePlay, Clock, ClosedCaption} from 'lucide-react';
 import {movies} from '../sampleStorage.js';
 
-const HeroSlider = ( {} ) => {
+const HeroSlider = ( {id} ) => {
     const [index, setIndex] = useState(0);
     
     useEffect(() => {
@@ -61,7 +61,7 @@ const HeroSlider = ( {} ) => {
                     </div>
                     <div className='absolute bottom-25 left-25 rounded-lg bg-red-600 p-3 flex flex-row text-white px-3 gap-2'>
                         <Play />
-                        <Link to='' >Watch now</Link>
+                        <Link to={`/streaming/${id}`} >Watch now</Link>
                     </div>
                     <Link to={`/details/${movies[index].id}`} className='absolute bottom-25 left-67 rounded-lg bg-red-600 p-3 flex flex-row text-white px-3 gap-2'>
                         <button >Details</button>

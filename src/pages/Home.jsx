@@ -89,6 +89,7 @@ const Home = () => {
             <main className="pt-20 px-4 md:px-8">
                 <div className="max-w-[2300px] mx-auto py-6">
                     <HeroSlider 
+                        id={limitedMovies[0].id}  /*WAY OF LOCATING ID W/O REDIRECT*/
                         />
                     
                     {/* Trending Anime Section */}
