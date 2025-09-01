@@ -8,7 +8,6 @@ import {ChevronLeft, ChevronRight, Play} from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
 import Footer from '../components/Footer.jsx';
 
-
 const Home = () => {
 
     const [startIndex, setStartIndex] = useState(0);
@@ -17,20 +16,23 @@ const Home = () => {
     //ADJUST ITEMS PER PAGE BASED ON SCREEN SIZE
     useEffect(()=> {
         const updateItemsPerPage = () => {
-            if(window.innerWidth < 990) {
+            if(window.innerWidth <= 990) {
                 setItemsPerPage(3);
             }
-            else if (window.innerWidth < 1436) {
+            else if (window.innerWidth <= 1200) {
+                setItemsPerPage(3);
+            }
+            else if (window.innerWidth <= 1436) {
                 setItemsPerPage(4);
             }
-            else if (window.innerWidth < 2000) {
+            else if (window.innerWidth <= 2000) {
                 setItemsPerPage(6);
             }
             else {
                 setItemsPerPage(10);
             }
         }
-
+        
         updateItemsPerPage()
         window.addEventListener('resize', updateItemsPerPage);
         return () => window.removeEventListener('resize', updateItemsPerPage); 
@@ -79,8 +81,6 @@ const Home = () => {
         }
     };
 
-
-    
     return (
         <div className="min-h-screen ">
             <Navbar />
@@ -95,7 +95,7 @@ const Home = () => {
                     {/* Trending Anime Section */}
                     <div className="mt-12 relative">
                         <h2 className="text-3xl font-bold text-red-600 mb-6">Trending Anime</h2>
-                        <div className="grid grid-cols-1 2xl:grid-cols-8 xl:grid-cols-6 lg md:grid-cols-4 sm:grid-cols-3 gap-6 mr-17 transition transition-transform duration-500 ease-in-out ">
+                        <div className="grid grid-cols-1 1xl:grid-cols-8 xl:grid-cols-6 lg md:grid-cols-4 sm:grid-cols-3 gap-6 mr-17 transition transition-transform duration-500 ease-in-out ">
                             <AnimatePresence initial={false}>
                                 {visibleItems.slice(0, 10).map((anime, index) => (
                                 <motion.div
@@ -104,7 +104,6 @@ const Home = () => {
                                     exit={{ opacity: 0, y: -20 }}       // exit animation
                                     transition={{ duration: 0.3 }}>
                                     
-                            
                                     <TrendingAnimeCard 
                                         key={index} 
                                         title={anime.title} 
