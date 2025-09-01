@@ -12,6 +12,9 @@ const Home = () => {
 
     const [startIndex, setStartIndex] = useState(0);
     const [itemsPerPage, setItemsPerPage] = useState(0);
+    const [items, setItems] = useState([]);
+    const [isLoading, setIsLoading] = useState(false);
+    const [error, setError] = useState(null);
 
     //ADJUST ITEMS PER PAGE BASED ON SCREEN SIZE
     useEffect(()=> {
@@ -32,14 +35,62 @@ const Home = () => {
                 setItemsPerPage(10);
             }
         }
-        
         updateItemsPerPage()
         window.addEventListener('resize', updateItemsPerPage);
         return () => window.removeEventListener('resize', updateItemsPerPage); 
     })
 
+    //CACHE KEY AND TTL(MS)
+    const CACHE_KEY = 'top-anime-cache-v1';
+    const TTL = 1000 * 60 * 10;
+
+    useEffect(() =>  {
+        let ignored = false;
+        async function load () {
+            setIsLoading(true);
+            setError(null);
+
+            try {
+                //CHECK CACHE
+                const raw = localStorage.getItem(CACHE_KEY);
+                if(raw) {
+                    const parsed = JSON.parse(raw);
+                    if(Date.now() - parsed.ts < TTL) {
+                        setItems(parsed.data);
+                        setIsLoading(false);
+                        return;
+                    }
+                }
+
+                //FETCH DATA 
+                const response = await fetch("https://api.jikan.moe/v4/top/anime"); //endpoint
+                if(!response.ok) throw new Error(`HTTP ${response.status}`)
+                    const json = await response.json();
+
+                    const list = Array.isArray(json.data) ? json.data : []; // to have a fallback
+
+                    //STORE CACHE 
+                    localStorage.setItem(
+                        CACHE_KEY ,
+                        JSON.stringify({ts: Date.now(), data: list})
+                    );
+
+                if (!ignored) setItems(list);
+            } catch (err) {
+                if (!ignored) setError(err.message || "Failed to load");
+            } finally {
+                if (!ignored) setIsLoading(false);
+            }
+        }
+
+        load();
+        return() => {
+            ignored = true;
+        }
+    }, [])
+
     //TO RESPECT BOTH PAGINATION (RENDERING, SCROLLING/DISPLAYING)
-    const limitedMovies = movies.slice(0, 10);
+    const limitedMovies = items.slice(0, 10);
     const visibleItems = limitedMovies.slice(startIndex, startIndex + itemsPerPage);
     const latestEpisodes = movies.slice(0, 12);
     const genres = [
@@ -88,16 +139,16 @@ const Home = () => {
             {/* Main content with proper spacing for fixed navbar */}
             <main className="pt-20 px-4 md:px-8">
                 <div className="max-w-[2300px] mx-auto py-6">
-                    <HeroSlider 
-                        id={limitedMovies[0].id}  /*WAY OF LOCATING ID W/O REDIRECT*/
-                        />
+                    {limitedMovies.length > 0 && (
+                        <HeroSlider id={limitedMovies[0].mal_id} />
+                    )}
                     
                     {/* Trending Anime Section */}
                     <div className="mt-12 relative">
                         <h2 className="text-3xl font-bold text-red-600 mb-6">Trending Anime</h2>
                         <div className="grid grid-cols-1 1xl:grid-cols-8 xl:grid-cols-6 lg md:grid-cols-4 sm:grid-cols-3 gap-6 mr-17 transition transition-transform duration-500 ease-in-out ">
                             <AnimatePresence initial={false}>
-                                {visibleItems.slice(0, 10).map((anime, index) => (
+                                {limitedMovies.slice(0, 10).map((anime, index) => (
                                 <motion.div
                                     initial={{ opacity: 0, y: 20 }}     // enter animation
                                     animate={{ opacity: 1, y: 0 }}      // animate to visible
@@ -105,11 +156,11 @@ const Home = () => {
                                     transition={{ duration: 0.3 }}>
                                     
                                     <TrendingAnimeCard 
-                                        key={index} 
+                                        key={anime.mal_id} 
                                         title={anime.title} 
-                                        img={anime.img}
-                                        episodeNumber={anime.id}
-                                        id={anime.id}
+                                        img={anime.images?.jpg?.image_url}
+                                        episodeNumber={index}
+                                        id={anime.mal_id}
                                         />
                                 </motion.div>
                                 ))}
