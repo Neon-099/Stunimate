@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import {ChevronLeft, ChevronRight, Play, CirclePlay, Clock, ClosedCaption} from 'lucide-react';
 import {movies} from '../sampleStorage.js';
 
-const HeroSlider = ( {id} ) => {
+const HeroSlider = ( {id, title, img, description, types, episodes} ) => {
     const [index, setIndex] = useState(0);
     
     useEffect(() => {
@@ -24,67 +24,42 @@ const HeroSlider = ( {id} ) => {
     };
     
     return (
-        <div className='relative w-full h-[900px] bg-[#28242c]'>
-            <AnimatePresence mode="wait">
-                <motion.div
-                    key={movies[index].id}
-                    initial={{ opacity: 0, scale: 1.1 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    exit={{ opacity: 0, scale: 0.9 }}
-                    transition={{ duration: 0.5 }}
-                    className="absolute inset-0"
-                >
-                    {/* Full-bleed background image */}
-                    <img 
-                        className='absolute inset-0 w-full h-full object-cover'
-                        src={movies[index].img}
-                        alt={movies[index].title}
-                    />
-                    {/* Soft overlays for readability without visible seams */}
-                    <div className="absolute bottom-55 left-16 right-0 p-8 text-white">
-                        <h2 className="text-4xl font-bold mb-2">{movies[index].title}</h2>
-                        <p className="text-lg opacity-90 text-sm pr-3">{movies[index].description || 'Amazing anime content'}</p>
-                    </div>
-                    <div className='absolute bottom-42 left-22 rounded-lg  p-3 flex flex-row text-white px-3 gap-2'>
-                        <div className='flex flex-row'>
-                            <CirclePlay />
-                            <p className='font-bold px-1'>TV</p>
-                        </div>
-                        <div className='flex flex-row px-1'>
-                            <Clock />
-                            <p className='font-bold px-1'>{movies[index].duration || '24m'}</p>
-                        </div>
-                        <div className='flex flex-row'>
-                            <ClosedCaption />
-                            <p className='font-bold px-1'>{movies[index].episodes || '11'}</p>
-                        </div>
-                    </div>
-                    <div className='absolute bottom-25 left-25 rounded-lg bg-red-600 p-3 flex flex-row text-white px-3 gap-2'>
-                        <Play />
-                        <Link to={`/streaming/${id}`} >Watch now</Link>
-                    </div>
-                    <Link to={`/details/${movies[index].id}`} className='absolute bottom-25 left-67 rounded-lg bg-red-600 p-3 flex flex-row text-white px-3 gap-2'>
-                        <button >Details</button>
-                        <ChevronRight />
-                    </Link >
-               
-                </motion.div>
-            </AnimatePresence>
+        <div className=''>
             
-            {/* Navigation arrows */}
-            <button 
-                onClick={prevSlide}
-                className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/70 hover:bg-white/30 text-white p-2 rounded-full backdrop-blur-sm transition-all"
-            >
-                <ChevronLeft />
-            </button>
-            
-            <button 
-                onClick={nextSlide}
-                className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/70 hover:bg-white/30 text-white p-2 rounded-full backdrop-blur-sm transition-all"
-            >
+            {/* Full-bleed background image */}
+            <img 
+                className='absolute inset-0 w-full h-full object-contains'
+                src={img}
+                alt={title}
+            />
+            {/* Soft overlays for readability without visible seams */}
+            <div className="absolute bottom-55 left-16 right-0 p-8 text-white">
+                <h2 className="text-4xl font-bold mb-2">{title}</h2>
+                <p className="text-lg opacity-90 text-sm pr-3">{description || 'Amazing anime content'}</p>
+            </div>
+            <div className='absolute bottom-42 left-22 rounded-lg  p-3 flex flex-row text-white px-3 gap-2'>
+                <div className='flex flex-row'>
+                    <CirclePlay />
+                    <p className='font-bold px-1'>TV</p>
+                </div>
+                <div className='flex flex-row px-1'>
+                    <Clock />
+                    <p className='font-bold px-1'>{'24m'}</p>
+                </div>
+                <div className='flex flex-row'>
+                    <ClosedCaption />
+                    <p className='font-bold px-1'>{episodes || '11'}</p>
+                </div>
+            </div>
+            <div className='absolute bottom-25 left-25 rounded-lg bg-red-600 p-3 flex flex-row text-white px-3 gap-2'>
+                <Play />
+                <Link to={`/streaming/${id}`} >Watch now</Link>
+            </div>
+            <Link to={`/details/${id}`} className='absolute bottom-25 left-67 rounded-lg bg-red-600 p-3 flex flex-row text-white px-3 gap-2'>
+                <button >Details</button>
                 <ChevronRight />
-            </button>
+            </Link >
+            
         </div>
     )
 }
