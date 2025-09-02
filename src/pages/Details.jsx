@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar.jsx';
 import Footer from '../components/Footer.jsx';
 import { useParams, Link } from 'react-router-dom';
@@ -7,14 +7,68 @@ import AnimeCard from '../components/AnimeCard.jsx';
 
 const Details = () => {
 	const { id } = useParams();
-	const anime = movies.find((m) => String(m.id) === String(id));
+	const [anime, setAnime] = useState(null);
+	const [loading, setLoading] = useState(true);
+
+	useEffect(() => {
+		const fetchAnimeDetails = async () => {
+			setLoading(true);
+			
+			// First try to find in local movies data
+			let foundAnime = movies.find((m) => String(m.id) === String(id));
+			
+			// If not found locally, try to fetch from API using the mal_id
+			if (!foundAnime) {
+				try {
+					const response = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
+					if (response.ok) {
+						const data = await response.json();
+						foundAnime = {
+							id: data.data.mal_id,
+							title: data.data.title,
+							img: data.data.images?.jpg?.image_url,
+							description: data.data.synopsis,
+							episodes: data.data.episodes,
+							status: data.data.status,
+							duration: data.data.duration,
+							genre: data.data.genres?.map(g => g.name) || [],
+							aired: data.data.aired?.string,
+							type: data.data.type,
+							score: data.data.score
+						};
+					}
+				} catch (error) {
+					console.error('Error fetching anime details:', error);
+				}
+			}
+			
+			setAnime(foundAnime);
+			setLoading(false);
+		};
+
+		fetchAnimeDetails();
+	}, [id]);
+
+	if (loading) {
+		return (
+			<div className="min-h-screen text-gray-800 p-6">
+				<Navbar />
+				<div className="max-w-[1800px] mx-auto pt-20">
+					<div className="flex justify-center items-center h-64">
+						<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+					</div>
+				</div>
+			</div>
+		);
+	}
 
 	if (!anime) {
 		return (
-			<div className="min-h-screen  text-gray-800 p-6">
-				<div className="max-w-[1800px] mx-auto">
+			<div className="min-h-screen text-gray-800 p-6">
+				<Navbar />
+				<div className="max-w-[1800px] mx-auto pt-20">
 					<Link to="/home" className="text-blue-600 hover:underline">Back</Link>
-					<div className="mt-8">Anime not found.</div>
+					<div className="mt-8 text-white">Anime not found.</div>
 				</div>
 			</div>
 		);
@@ -55,9 +109,9 @@ const Details = () => {
 
 						{/* Action buttons */}
 						<div className="flex flex-wrap gap-3 mb-5">
-							<button className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-full shadow">
+							<Link to={`/streaming/${anime.id}`} className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-full shadow inline-block">
 								Watch now
-							</button>
+							</Link>
 							<button className="border px-4 py-2 rounded-full hover:bg-gray-100">
 								+ Add to List
 							</button>

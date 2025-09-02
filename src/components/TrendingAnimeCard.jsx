@@ -1,7 +1,7 @@
 import React, {useState, useEffect} from 'react';
 import { Link } from 'react-router-dom';
 
-const TrendingAnimeCard = ({ anime, episodeNumber = "01", title, img, id, limit=10 }) => {
+const TrendingAnimeCard = ({  episodeNumber = "01", title, img, id, }) => {
     
     return (
         <div className="block cursor-pointer">
