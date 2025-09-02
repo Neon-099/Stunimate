@@ -16,10 +16,15 @@ import {
     ThumbsUpIcon,
     ThumbsDownIcon,
 } from 'lucide-react';
+import { useParams, Link } from 'react-router-dom';
+import { movies } from '../sampleStorage.js';
 import Navbar from '../components/Navbar';
 import Footer from '../components/Footer';
 
 const StreamingPlatforms = () => {
+    const { id } = useParams();
+    const [anime, setAnime] = useState(null);
+    const [loading, setLoading] = useState(true);
     const [isPlaying, setIsPlaying] = useState(false);
     const [currentTime, setCurrentTime] = useState(0);
     const [duration, setDuration] = useState(24 * 60 + 7);
@@ -59,6 +64,46 @@ const StreamingPlatforms = () => {
             if(isPlaying) setShowControls(false);
         }, 3000);
     };
+
+    // Fetch anime data based on ID
+    useEffect(() => {
+        const fetchAnimeDetails = async () => {
+            setLoading(true);
+            
+            // First try to find in local movies data
+            let foundAnime = movies.find((m) => String(m.id) === String(id));
+            
+            // If not found locally, try to fetch from API using the mal_id
+            if (!foundAnime) {
+                try {
+                    const response = await fetch(`https://api.jikan.moe/v4/anime/${id}`);
+                    if (response.ok) {
+                        const data = await response.json();
+                        foundAnime = {
+                            id: data.data.mal_id,
+                            title: data.data.title,
+                            img: data.data.images?.jpg?.image_url,
+                            description: data.data.synopsis,
+                            episodes: data.data.episodes,
+                            status: data.data.status,
+                            duration: data.data.duration,
+                            genre: data.data.genres?.map(g => g.name) || [],
+                            aired: data.data.aired?.string,
+                            type: data.data.type,
+                            score: data.data.score
+                        };
+                    }
+                } catch (error) {
+                    console.error('Error fetching anime details:', error);
+                }
+            }
+            
+            setAnime(foundAnime);
+            setLoading(false);
+        };
+
+        fetchAnimeDetails();
+    }, [id]);
 
     useEffect(() => {
         resetControlsTimeout();

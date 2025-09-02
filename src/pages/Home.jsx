@@ -12,7 +12,8 @@ const Home = () => {
 
     const [startIndex, setStartIndex] = useState(0);
     const [itemsPerPage, setItemsPerPage] = useState(0);
-    const [items, setItems] = useState([]);
+    const [topAnime, setTopAnime] = useState([]);
+    const [latestEpisode, setLatestEpisode] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -38,7 +39,7 @@ const Home = () => {
         updateItemsPerPage()
         window.addEventListener('resize', updateItemsPerPage);
         return () => window.removeEventListener('resize', updateItemsPerPage); 
-    })
+    }, [])
 
     //CACHE KEY AND TTL(MS)
     const CACHE_KEY = 'top-anime-cache-v1';
@@ -56,26 +57,35 @@ const Home = () => {
                 if(raw) {
                     const parsed = JSON.parse(raw);
                     if(Date.now() - parsed.ts < TTL) {
-                        setItems(parsed.data);
+                        setTopAnime(parsed.data);
+                        setLatestEpisode(parsed.data);
                         setIsLoading(false);
                         return;
                     }
                 }
 
                 //FETCH DATA 
-                const response = await fetch("https://api.jikan.moe/v4/top/anime"); //endpoint
+                const response = await fetch("https://api.jikan.moe/v4/top/anime"); //endpoint (for top anime)
                 if(!response.ok) throw new Error(`HTTP ${response.status}`)
                     const json = await response.json();
 
                     const list = Array.isArray(json.data) ? json.data : []; // to have a fallback
 
+                //LATEST EPISODES
+                const response2 = await fetch("https://api.jikan.moe/v4/watch/episodes"); //endpoint (for latest episodes)
+                if(!response2.ok) throw new Error(`HTTP ${response2.status}`)
+                    const json2 = await response2.json();
+
+                    const list2 = Array.isArray(json2.data) ? json2.data : []; // to have a fallback
+
+
                     //STORE CACHE 
                     localStorage.setItem(
                         CACHE_KEY ,
-                        JSON.stringify({ts: Date.now(), data: list})
+                        JSON.stringify({ts: Date.now(), data: list, list2})
                     );
 
-                if (!ignored) setItems(list);
+                if (!ignored) setTopAnime(list) && setLatestEpisode(list2);
             } catch (err) {
                 if (!ignored) setError(err.message || "Failed to load");
             } finally {
@@ -90,9 +100,9 @@ const Home = () => {
     }, [])
 
     //TO RESPECT BOTH PAGINATION (RENDERING, SCROLLING/DISPLAYING)
-    const limitedMovies = items.slice(0, 10);
+    const limitedMovies = topAnime.slice(0, 10);
     const visibleItems = limitedMovies.slice(startIndex, startIndex + itemsPerPage);
-    const latestEpisodes = movies.slice(0, 12);
+    const latestEpisodes = latestEpisode.slice(0, 12);
     const genres = [
         { name: 'Action', colorClass: 'text-emerald-300' },
         { name: 'Adventure', colorClass: 'text-amber-300' },
@@ -121,7 +131,7 @@ const Home = () => {
     ];
     
     const handleNext = () => {
-        if(startIndex + itemsPerPage < movies.length) {
+        if(startIndex + itemsPerPage < topAnime.length) {
             setStartIndex(startIndex + 1);
         }
     };
@@ -129,6 +139,19 @@ const Home = () => {
     const handlePrev = () => {
         if(startIndex > 0 ) {
             setStartIndex( startIndex - 1 );
+        }
+    };
+    
+    const [heroIndex, setHeroIndex] = useState(0);
+    const nextSlide = () => {
+        if (limitedMovies.length > 0) {
+            setHeroIndex((prevIndex) => (prevIndex + 1) % limitedMovies.length);
+        }
+    };
+    
+    const prevSlide = () => {
+        if (limitedMovies.length > 0) {
+            setHeroIndex((prevIndex) => (prevIndex - 1 + limitedMovies.length) % limitedMovies.length);
         }
     };
 
@@ -139,27 +162,65 @@ const Home = () => {
             {/* Main content with proper spacing for fixed navbar */}
             <main className="pt-20 px-4 md:px-8">
                 <div className="max-w-[2300px] mx-auto py-6">
-                    {limitedMovies.length > 0 && (
-                        <HeroSlider id={limitedMovies[0].mal_id} />
-                    )}
-                    
+                    {/*Hero Slider Section*/}
+                    <div className='relative w-full h-[900px] bg-[#28242c]'>
+                        <AnimatePresence mode="wait">
+                            {limitedMovies.length > 0 && (
+                                <motion.div
+                                    key={limitedMovies[heroIndex]?.mal_id}
+                                    initial={{ opacity: 0, scale: 1.1 }}
+                                    animate={{ opacity: 1, scale: 1 }}
+                                    exit={{ opacity: 0, scale: 0.9 }}
+                                    transition={{ duration: 0.5 }}
+                                    className="absolute inset-0"
+                                >
+                                    <HeroSlider
+                                        id={limitedMovies[heroIndex]?.mal_id}
+                                        title={limitedMovies[heroIndex]?.title}
+                                        img={limitedMovies[heroIndex]?.images?.jpg?.image_url}
+                                        description={limitedMovies[heroIndex]?.synopsis}
+                                    />
+                                </motion.div>
+                            )}
+                        </AnimatePresence>
+
+                        {/* Navigation arrows */}
+                        <button 
+                            onClick={prevSlide}
+                            disabled={limitedMovies.length === 0}
+                            className="absolute left-4 top-1/2 -translate-y-1/2 bg-black/70 hover:bg-white/30 text-white p-2 rounded-full backdrop-blur-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <ChevronLeft />
+                        </button>
+                        
+                        <button 
+                            onClick={nextSlide}
+                            disabled={limitedMovies.length === 0}
+                            className="absolute right-4 top-1/2 -translate-y-1/2 bg-black/70 hover:bg-white/30 text-white p-2 rounded-full backdrop-blur-sm transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                        >
+                            <ChevronRight />
+                        </button>
+                    </div>
+                   
+
+
                     {/* Trending Anime Section */}
                     <div className="mt-12 relative">
                         <h2 className="text-3xl font-bold text-red-600 mb-6">Trending Anime</h2>
                         <div className="grid grid-cols-1 1xl:grid-cols-8 xl:grid-cols-6 lg md:grid-cols-4 sm:grid-cols-3 gap-6 mr-17 transition transition-transform duration-500 ease-in-out ">
                             <AnimatePresence initial={false}>
-                                {limitedMovies.slice(0, 10).map((anime, index) => (
+                                {visibleItems.slice(0, 10).map((anime, index) => (
                                 <motion.div
+                                    key={anime.mal_id}
                                     initial={{ opacity: 0, y: 20 }}     // enter animation
                                     animate={{ opacity: 1, y: 0 }}      // animate to visible
                                     exit={{ opacity: 0, y: -20 }}       // exit animation
                                     transition={{ duration: 0.3 }}>
                                     
                                     <TrendingAnimeCard 
-                                        key={anime.mal_id} 
                                         title={anime.title} 
                                         img={anime.images?.jpg?.image_url}
-                                        episodeNumber={index}
+                                        episodeNumber={anime.episode}
                                         id={anime.mal_id}
                                         />
                                 </motion.div>
@@ -187,7 +248,7 @@ const Home = () => {
                     <div className="mt-12 xl:grid  xl:grid-cols-4 gap-8 items-start">
                         <div className="xl:col-span-3">
                             <div className='flex justify-between items-center'>
-                                <h2 className="text-3xl font-bold text-white mb-6">Latest Episode</h2>
+                                <h2 className="text-3xl font-bold text-red-600 mb-6">Latest Episode</h2>
                                 <button className='text-white'>Show more</button>
                             </div>
                             
@@ -203,11 +264,12 @@ const Home = () => {
                                             <AnimeCard 
                                                 id={anime.id}
                                                 title={anime.title} 
-                                                img={anime.img}
-                                                description={anime.description}
+                                                img={anime.images?.jpg?.image_url}
+                                                description={anime.synopsis}
                                                 duration={anime.duration || '24m'}
                                                 status={anime.status || 'Currently Airing'}
-                                                genres={anime.genre || []}
+                                                genres={anime.genres || []}
+                                                subRatings={anime.episodes}
                                             />
                                         </motion.div>
                                     ))}
