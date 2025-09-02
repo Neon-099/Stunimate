@@ -54,8 +54,7 @@ const AnimeCard = ({
                     <div className="flex flex-wrap items-center gap-2 mb-3 text-xs">
                         <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded bg-amber-500/20 text-amber-300">★ N/A</span>
                         <span className="px-2 py-0.5 rounded bg-yellow-500/20 text-yellow-300">HD</span>
-                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">cc {subRatings.cc}</span>
-                        <span className="px-2 py-0.5 rounded bg-rose-500/20 text-rose-300">{subRatings.ep}</span>
+                        <span className="px-2 py-0.5 rounded bg-emerald-500/20 text-emerald-300">ccs {subRatings}</span>
                         <span className="ml-auto px-2 py-0.5 rounded bg-gray-700/60 text-gray-200">{type}</span>
                     </div>
 
@@ -89,7 +88,9 @@ const AnimeCard = ({
                         {genres.length > 0 && (
                             <div>
                                 <span className="text-gray-400">Genres: </span>
-                                {genres.join(', ')}
+                                {genres.map((g, i) => (
+                                    <div key={g.mal_id}>{g.name}</div>
+                                ))}
                             </div>
                         )}
                         <div>
