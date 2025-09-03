@@ -1,13 +1,15 @@
 import React from 'react';
-import { DotLottieReact } from '@lottiefiles/dotlottie-react';
+import Navbar from '../components/Navbar.jsx';
 
 const LoadingSpinner = () => {
   return (
-    <DotLottieReact
-      src="https://lottie.host/2e9e7d19-efdb-4b3c-b666-cc798e5d7513/1B8u81crdq.lottie"
-      loop
-      autoplay
-    />
+    <div className="min-h-screen  text-gray-800 p-6">
+				<div className="max-w-[2100px] mx-auto pt-20">
+					<div className="flex justify-center items-center h-64">
+						<div className="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600"></div>
+					</div>
+				</div>
+			</div>
   );
 };
 

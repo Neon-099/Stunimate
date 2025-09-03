@@ -7,6 +7,7 @@ import {movies} from '../sampleStorage.js';
 import {ChevronLeft, ChevronRight, Play} from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
 import Footer from '../components/Footer.jsx';
+import LoadingSpinner from '../components/LoadingSpinner.jsx';
 
 const Home = () => {
 
@@ -97,12 +98,12 @@ const Home = () => {
         return() => {
             ignored = true;
         }
-    }, [])
+    }, [])  
 
     //TO RESPECT BOTH PAGINATION (RENDERING, SCROLLING/DISPLAYING)
     const limitedMovies = topAnime.slice(0, 10);
     const visibleItems = limitedMovies.slice(startIndex, startIndex + itemsPerPage);
-    const latestEpisodes = latestEpisode.slice(0, 12);
+    const latestEpisodes = latestEpisode.slice(0, 18);
     const genres = [
         { name: 'Action', colorClass: 'text-emerald-300' },
         { name: 'Adventure', colorClass: 'text-amber-300' },
@@ -158,12 +159,18 @@ const Home = () => {
     return (
         <div className="min-h-screen ">
             <Navbar />
-            
+
+            {isLoading ? (
+                <LoadingSpinner />
+            ) : (
+                <p className='text-red-200'>{error}</p>
+            )}
+
             {/* Main content with proper spacing for fixed navbar */}
             <main className="pt-20 px-4 md:px-8">
                 <div className="max-w-[2300px] mx-auto py-6">
                     {/*Hero Slider Section*/}
-                    <div className='relative w-full h-[900px] bg-[#28242c]'>
+                    <div className='relative w-full h-[1200px] bg-[#28242c]'>
                         <AnimatePresence mode="wait">
                             {limitedMovies.length > 0 && (
                                 <motion.div
