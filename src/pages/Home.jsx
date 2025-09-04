@@ -269,7 +269,7 @@ const Home = () => {
                                             transition={{ duration: 0.3 }}
                                             key={`latest-${index}`}>
                                             <AnimeCard 
-                                                id={anime.id}
+                                                id={anime.mal_id}
                                                 title={anime.title} 
                                                 img={anime.images?.jpg?.image_url}
                                                 description={anime.synopsis}

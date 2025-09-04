@@ -9,14 +9,21 @@ const Details = () => {
 	const { id } = useParams();
 	const [anime, setAnime] = useState(null);
 	const [loading, setLoading] = useState(true);
+	const [recommended, setRecommended] = useState(null);
 
 	useEffect(() => {
 		const fetchAnimeDetails = async () => {
 			setLoading(true);
 			
-			// First try to find in local movies data
-			let foundAnime = movies.find((m) => String(m.id) === String(id));
-			
+			//FETCH DATA for recommended anime
+	        const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/recommendations`);			
+			if(!res.ok) throw new Error(`HTTP ${res.status}`)
+				const json = await res.json();
+				const list = Array.isArray(json.data) ? json.data : [];
+
+				// First try to find in local movies data
+				let foundAnime = movies.find((m) => String(m.id) === String(id));
+				
 			// If not found locally, try to fetch from API using the mal_id
 			if (!foundAnime) {
 				try {
@@ -43,6 +50,7 @@ const Details = () => {
 			}
 			
 			setAnime(foundAnime);
+			setRecommended(list);
 			setLoading(false);
 		};
 
@@ -157,16 +165,16 @@ const Details = () => {
 					<div className="lg:col-span-3">
 						<h2 className="text-2xl font-bold text-orange-500 mb-6">Recommended for you</h2>
 						<div className="grid grid-cols-2 md:grid-cols-6 gap-4">
-							{movies.slice(0, 20).map((anime, index) => (
-								<div key={index} className="relative group">
+							{recommended.slice(0, 20).map((anime, index) => (
+								<div key={anime.entry.mal_id} className="">
 									<AnimeCard 
-										id={anime.id}
-										title={anime.title} 
-										img={anime.img}
-										description={anime.description}
-										duration={anime.duration || '24m'}
-										status={anime.status || 'Currently Airing'}
-										genres={anime.genre || []}
+										id={anime.entry.mal_id}
+										title={anime.entry.title} 
+										img={anime.entry.images?.jpg?.image_url}
+										description={anime.entry.description}
+										duration={anime.entry.duration || '24m'}
+										status={anime.entry.status || 'Currently Airing'}
+										genres={anime.entry.genre || []}
 										/>
 								</div>
 							))}

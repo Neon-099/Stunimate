@@ -46,7 +46,7 @@ const StreamingPlatforms = () => {
     const containerRef = useRef(null);
     const progressRef = useRef(null);
     const controlsTimeoutRef = useRef(null);
-
+    
     //FORMAT TIME HELPER
     const formatTime = (seconds) => {
         const mins = Math.floor(seconds / 60);
