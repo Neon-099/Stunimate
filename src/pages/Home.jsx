@@ -15,6 +15,7 @@ const Home = () => {
     const [itemsPerPage, setItemsPerPage] = useState(0);
     const [topAnime, setTopAnime] = useState([]);
     const [latestEpisode, setLatestEpisode] = useState([]);
+    const [genres, setGenres] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
 
@@ -58,8 +59,9 @@ const Home = () => {
                 if(raw) {
                     const parsed = JSON.parse(raw);
                     if(Date.now() - parsed.ts < TTL) {
-                        setTopAnime(parsed.data);
-                        setLatestEpisode(parsed.data);
+                        setTopAnime(parsed.top);
+                        setLatestEpisode(parsed.latest);
+                        setGenres(parsed.genres);
                         setIsLoading(false);
                         return;
                     }
@@ -69,24 +71,37 @@ const Home = () => {
                 const response = await fetch("https://api.jikan.moe/v4/top/anime"); //endpoint (for top anime)
                 if(!response.ok) throw new Error(`HTTP ${response.status}`)
                     const json = await response.json();
-
                     const list = Array.isArray(json.data) ? json.data : []; // to have a fallback
 
                 //LATEST EPISODES
                 const response2 = await fetch("https://api.jikan.moe/v4/watch/episodes"); //endpoint (for latest episodes)
                 if(!response2.ok) throw new Error(`HTTP ${response2.status}`)
                     const json2 = await response2.json();
-
                     const list2 = Array.isArray(json2.data) ? json2.data : []; // to have a fallback
 
+                //GETTING GENRES (FULL LIST)
+                const response3 = await fetch("https://api.jikan.moe/v4/genres/anime")
+                if(!response3.ok) throw new Error(`HTTP ${response3.status}`);
+                    const json3 = await response3.json();
+                    const list3 = Array.isArray(json3.data) ? json3.data : [];
+                 
 
                     //STORE CACHE 
                     localStorage.setItem(
                         CACHE_KEY ,
-                        JSON.stringify({ts: Date.now(), data: list, list2})
+                        JSON.stringify({
+                            ts: Date.now(), 
+                            top: list,
+                            latest: list2,
+                            genres: list3
+                        })
                     );
 
-                if (!ignored) setTopAnime(list) && setLatestEpisode(list2);
+                if (!ignored) {
+                    setTopAnime(list)
+                    setLatestEpisode(list2)
+                    setGenres(list3);
+                }
             } catch (err) {
                 if (!ignored) setError(err.message || "Failed to load");
             } finally {
@@ -104,32 +119,6 @@ const Home = () => {
     const limitedMovies = topAnime.slice(0, 10);
     const visibleItems = limitedMovies.slice(startIndex, startIndex + itemsPerPage);
     const latestEpisodes = latestEpisode.slice(0, 18);
-    const genres = [
-        { name: 'Action', colorClass: 'text-emerald-300' },
-        { name: 'Adventure', colorClass: 'text-amber-300' },
-        { name: 'Cars', colorClass: 'text-rose-300' },
-        { name: 'Comedy', colorClass: 'text-indigo-300' },
-        { name: 'Dementia', colorClass: 'text-sky-300' },
-        { name: 'Demons', colorClass: 'text-rose-300' },
-        { name: 'Drama', colorClass: 'text-emerald-300' },
-        { name: 'Ecchi', colorClass: 'text-lime-300' },
-        { name: 'Fantasy', colorClass: 'text-amber-300' },
-        { name: 'Game', colorClass: 'text-rose-300' },
-        { name: 'Harem', colorClass: 'text-purple-300' },
-        { name: 'Historical', colorClass: 'text-sky-300' },
-        { name: 'Horror', colorClass: 'text-rose-300' },
-        { name: 'Isekai', colorClass: 'text-emerald-300' },
-        { name: 'Josei', colorClass: 'text-lime-300' },
-        { name: 'Kids', colorClass: 'text-amber-300' },
-        { name: 'Magic', colorClass: 'text-rose-300' },
-        { name: 'Martial Arts', colorClass: 'text-violet-300' },
-        { name: 'Mecha', colorClass: 'text-sky-300' },
-        { name: 'Military', colorClass: 'text-amber-300' },
-        { name: 'Music', colorClass: 'text-emerald-300' },
-        { name: 'Mystery', colorClass: 'text-lime-300' },
-        { name: 'Parody', colorClass: 'text-amber-300' },
-        { name: 'Police', colorClass: 'text-rose-300' },
-    ];
     
     const handleNext = () => {
         if(startIndex + itemsPerPage < topAnime.length) {
@@ -156,6 +145,16 @@ const Home = () => {
         }
     };
 
+    const genreColors = (name) => {
+        let hash = 0;
+        for(let i = 0; i < name.length; i++) {
+            hash = name.charCodeAt(i) + ((hash << 5) - hash);
+        }
+        const hue = hash % 360;
+        return `hsl${hue}, 60%, 50%`;
+    }
+
+    console.log('genres: ',topAnime)
     return (
         <div className="min-h-screen ">
             <Navbar />
@@ -208,8 +207,6 @@ const Home = () => {
                             <ChevronRight />
                         </button>
                     </div>
-                   
-
 
                     {/* Trending Anime Section */}
                     <div className="mt-12 relative">
@@ -270,13 +267,13 @@ const Home = () => {
                                             key={`latest-${index}`}>
                                             <AnimeCard 
                                                 id={anime.mal_id}
-                                                title={anime.title} 
-                                                img={anime.images?.jpg?.image_url}
-                                                description={anime.synopsis}
-                                                duration={anime.duration || '24m'}
-                                                status={anime.status || 'Currently Airing'}
-                                                genres={anime.genres || []}
-                                                subRatings={anime.episodes}
+                                                title={anime.entry.title} 
+                                                img={anime.entry.images?.jpg?.image_url}
+                                                description={anime.entry.synopsis}
+                                                duration={anime.entry.duration || '24m'}
+                                                status={anime.entry.status || 'Currently Airing'}
+                                                genres={anime.entry.genres || []}
+                                                subRatings={anime.entry.episodes}
                                             />
                                         </motion.div>
                                     ))}
@@ -289,8 +286,16 @@ const Home = () => {
                             <div className="grid grid-cols-2 gap-x-8 gap-y-4">
                                 {genres.map((g) => (
                                     <button
-                                        key={g.name}
-                                        className={`text-left text-base font-medium ${g.colorClass} hover:underline`}
+                                        key={g.mal_id || g.name}
+                                         style={{
+      backgroundColor: genreColors[g.name] || "#95a5a6", // fallback gray
+      color: "white",
+      borderRadius: "8px",
+      padding: "4px 10px",
+      margin: "4px",
+      border: "none",
+      cursor: "pointer",
+    }}
                                     >
                                         {g.name}
                                     </button>
