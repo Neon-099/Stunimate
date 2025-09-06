@@ -97,5 +97,5 @@ src/
 📬 **Contact**  
 👤 Niño Emman  
 📧 Email: [Emmannatividad099@gmail.com](mailto:Emmannatividad099@gmail.com)  
-🔗 Portfolio: portfolio.com //soon  
+🔗 Portfolio: [portfolio.com //soon ](https://neon-port.netlify.app/) 
 🐙 GitHub: [github.com/Neon-099](https://github.com/Neon-099)
