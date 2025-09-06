@@ -4,7 +4,7 @@ import HeroSlider from '../components/HeroSlider.jsx';
 import TrendingAnimeCard from '../components/TrendingAnimeCard.jsx';
 import AnimeCard from '../components/AnimeCard.jsx';
 import {movies} from '../sampleStorage.js';
-import {ChevronLeft, ChevronRight, Play} from 'lucide-react';
+import {ChevronLeft, ChevronRight, FastForward, Play} from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
 import Footer from '../components/Footer.jsx';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
@@ -18,6 +18,7 @@ const Home = () => {
     const [genres, setGenres] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isActive, setIsActive] = useState(false);
+    const [genreIsActive, setGenreIsActive] = useState(false);
     const [error, setError] = useState(null);  
 
 
@@ -224,8 +225,8 @@ const Home = () => {
         return `hsl${hue}, 60%, 50%`;
     }
 
-    const latestEpisodeShowMore = isActive ? latestEpisode.slice(0, 20) : latestEpisode;
-    const genresShowMore = isActive ? genres.slice(0, 20) : genres;
+    const latestEpisodeShowMore = isActive ? latestEpisode : latestEpisode.slice(0, 20);
+    const genresShowMore = genreIsActive ? genres : genres.slice(0, 20);
     
 
     return (
@@ -335,7 +336,7 @@ const Home = () => {
                                 <h2 className="text-3xl font-bold text-red-600 mb-6">Latest Episode</h2>
                                 <button className='text-white' 
                                     onClick={() => setIsActive(!isActive)}>
-                                    {!isActive ? 'Show less' : 'Show more'}
+                                    {!isActive ? 'Show more' : 'Show less'}
                                 </button>
                             </div>
                             
@@ -385,8 +386,8 @@ const Home = () => {
                                 ))}
                             </div>
                             <button className="mt-6 w-full bg-gray-700/80 hover:bg-gray-600 text-white font-semibold py-3 rounded-md"
-                                onClick={() => setIsActive(!isActive)}>
-                                {isActive ? 'Show less' : 'Show more'}
+                                onClick={() => setGenreIsActive(!genreIsActive)}>
+                                {genreIsActive ? 'Show less' : 'Show more'}
                             </button>
                         </aside>
                     </div>

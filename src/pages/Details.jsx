@@ -78,8 +78,8 @@ const Details = () => {
 		fetchAnimeDetails();
 	}, [id]);
 
-	const mostPopularShowMore = isActive ? mostPopular  : mostPopular.slice(0, 5);
-	
+	const mostPopularShowMore = isActive ? mostPopular.slice(0, 12)  : mostPopular.slice(0, 5);
+
 	if (loading) {
 		return (
 			<div className="max-h-screen text-gray-800 p-6">
