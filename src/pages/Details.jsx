@@ -10,11 +10,16 @@ const Details = () => {
 	const [anime, setAnime] = useState(null);
 	const [loading, setLoading] = useState(true);
 	const [recommended, setRecommended] = useState(null);
+	const [mostPopular, setMostPopular] = useState([]);
+	const [isActive, setIsActive] = useState(false);
 
 	useEffect(() => {
 		const fetchAnimeDetails = async () => {
-			setLoading(true);
 			
+			let ignored = false;
+			setLoading(true);
+
+			try {
 			//FETCH DATA for recommended anime
 	        const res = await fetch(`https://api.jikan.moe/v4/anime/${id}/recommendations`);			
 			if(!res.ok) throw new Error(`HTTP ${res.status}`)
@@ -23,7 +28,7 @@ const Details = () => {
 
 				// First try to find in local movies data
 				let foundAnime = movies.find((m) => String(m.id) === String(id));
-				
+
 			// If not found locally, try to fetch from API using the mal_id
 			if (!foundAnime) {
 				try {
@@ -49,17 +54,34 @@ const Details = () => {
 				}
 			}
 			
-			setAnime(foundAnime);
-			setRecommended(list);
-			setLoading(false);
-		};
 
+			//GETTING POPULAR ANIME
+			const response2 = await fetch('https://api.jikan.moe/v4/top/anime'); //endpoint (for top anime)
+			if(!response2.ok) throw new Error(`HTTP ${response2.status}`);
+				const json2 = await response2.json();
+				const list2 = Array.isArray(json2.data) ? json2.data : [];
+
+			
+		
+
+			if(!ignored) {
+				setAnime(foundAnime);
+				setRecommended(list);
+				setMostPopular(list2);
+				setLoading(false);
+			}
+		} 
+		catch (err) {
+				
+		}
+	}
 		fetchAnimeDetails();
 	}, [id]);
 
+	const mostPopularShowMore = isActive ? mostPopular  : mostPopular.slice(0, 5);
 	if (loading) {
 		return (
-			<div className="min-h-screen text-gray-800 p-6">
+			<div className="max-h-screen text-gray-800 p-6">
 				<Navbar />
 				<div className="max-w-[1800px] mx-auto pt-20">
 					<div className="flex justify-center items-center h-64">
@@ -120,7 +142,7 @@ const Details = () => {
 							<Link to={`/streaming/${anime.id}`} className="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-full shadow inline-block">
 								Watch now
 							</Link>
-							<button className="border px-4 py-2 rounded-full hover:bg-gray-100">
+							<button className="border px-4 py-2 rounded-full hover:bg-gray-100 hover:text-black ">
 								+ Add to List
 							</button>
 						</div>
@@ -185,22 +207,16 @@ const Details = () => {
 					<div className="lg:col-span-1">
 						<div className="flex justify-between items-center mb-6">
 							<h2 className="text-2xl font-bold text-orange-500">Most Popular</h2>
-							<button className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded text-sm">
-								Show more
+							<button className="bg-gray-700 hover:bg-gray-800 text-white px-4 py-2 rounded text-sm"
+								onClick={() => setIsActive(!isActive)} >
+								{isActive ? 'Show less' : 'Show more'}
 							</button>
 						</div>
 						<div className="space-y-2">
-							{[
-								{ title: 'One Piece', type: 'TV', img: anime.img, badges: ['1141', '1133'] },
-								{ title: 'Naruto: Shippuden', type: 'TV', img: anime.img, badges: ['500', '500', '500'] },
-								{ title: 'Bleach', type: 'TV', img: anime.img, badges: ['366', '366', '366'] },
-								{ title: 'Black Clover', type: 'TV', img: anime.img, badges: ['170', '170', '170'] },
-								{ title: 'Solo Leveling Season 2: Arise...', type: 'TV', img: anime.img, badges: ['13', '13', '13'] },
-								{ title: 'Jujutsu Kaisen 2nd', type: 'TV', img: anime.img, badges: ['12', '12', '12'] }
-							].map((item, index) => (
-								<div key={index} className="flex items-center gap-3 p-3 hover:bg-gray-100 rounded-lg transition-colors">
+							{ mostPopularShowMore.map((item, index) => (
+								<div key={index} className="flex items-center gap-3 p-3 bg-gray-100 rounded-lg transition-colors">
 									<img 
-										src={item.img} 
+										src={item.images?.jpg?.image_url}
 										alt={item.title} 
 										className="w-16 h-16 object-cover rounded shadow-sm" 
 									/>
@@ -208,11 +224,7 @@ const Details = () => {
 										<h3 className="font-medium text-xs">{item.title}</h3>
 										<p className="text-sm text-gray-500">{item.type}</p>
 										<div className="flex gap-1 ">
-											{item.badges.map((badge, badgeIndex) => (
-												<span key={badgeIndex} className="bg-green-500 text-white text-xs px-1 rounded">
-													{badge}
-												</span>
-											))}
+											
 										</div>
 									</div>
 									
