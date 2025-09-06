@@ -79,6 +79,7 @@ const Details = () => {
 	}, [id]);
 
 	const mostPopularShowMore = isActive ? mostPopular  : mostPopular.slice(0, 5);
+	
 	if (loading) {
 		return (
 			<div className="max-h-screen text-gray-800 p-6">

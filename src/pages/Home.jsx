@@ -17,7 +17,9 @@ const Home = () => {
     const [latestEpisode, setLatestEpisode] = useState([]);
     const [genres, setGenres] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
-    const [error, setError] = useState(null);
+    const [isActive, setIsActive] = useState(false);
+    const [error, setError] = useState(null);  
+
 
     //ADJUST ITEMS PER PAGE BASED ON SCREEN SIZE
     useEffect(()=> {
@@ -43,20 +45,45 @@ const Home = () => {
         return () => window.removeEventListener('resize', updateItemsPerPage); 
     }, [])
 
-    //CACHE KEY AND TTL(MS)
+    //CACHE KEY AND TTL(MS) - Extended cache time due to rate limiting
     const CACHE_KEY = 'top-anime-cache-v1';
-    const TTL = 1000 * 60 * 10;
+    const TTL = 1000 * 60 * 30; // 30 minutes cache
+
+    // Rate limiting helper
+    const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+    // Fetch with retry and rate limiting
+    const fetchWithRetry = async (url, retries = 3, delayMs = 1000) => {
+        for (let i = 0; i < retries; i++) {
+            try {
+                const response = await fetch(url);
+                if (response.status === 429) {
+                    // Rate limited, wait longer
+                    const waitTime = Math.pow(2, i) * delayMs; // Exponential backoff
+                    console.warn(`Rate limited, waiting ${waitTime}ms before retry ${i + 1}/${retries}`);
+                    await delay(waitTime);
+                    continue;
+                }
+                return response;
+            } catch (error) {
+                if (i === retries - 1) throw error;
+                await delay(delayMs);
+            }
+        }
+        throw new Error('Max retries exceeded');
+    };
 
     useEffect(() =>  {
         let ignored = false;
-        async function load () {
-            setIsLoading(true);
-            setError(null);
 
-            try {
-                //CHECK CACHE
-                const raw = localStorage.getItem(CACHE_KEY);
-                if(raw) {
+        async function load () {
+            setError(null);
+            setIsLoading(true);
+
+            //CHECK CACHE FIRST
+            const raw = localStorage.getItem(CACHE_KEY);
+            if(raw) {
+                try {
                     const parsed = JSON.parse(raw);
                     if(Date.now() - parsed.ts < TTL) {
                         setTopAnime(parsed.top);
@@ -65,45 +92,89 @@ const Home = () => {
                         setIsLoading(false);
                         return;
                     }
+                } catch (cacheError) {
+                    console.warn('Cache parsing error:', cacheError);
+                    localStorage.removeItem(CACHE_KEY);
                 }
+            }
 
-                //FETCH DATA 
-                const response = await fetch("https://api.jikan.moe/v4/top/anime"); //endpoint (for top anime)
-                if(!response.ok) throw new Error(`HTTP ${response.status}`)
-                    const json = await response.json();
-                    const list = Array.isArray(json.data) ? json.data : []; // to have a fallback
+            try {
+                // Fetch data sequentially with delays to respect rate limits
+                console.log('Fetching top anime...');
+                const res1 = await fetchWithRetry("https://api.jikan.moe/v4/top/anime");
+                
+                // Wait between requests to avoid rate limiting
+                await delay(1000);
+                
+                console.log('Fetching latest episodes...');
+                const res2 = await fetchWithRetry("https://api.jikan.moe/v4/watch/episodes");
+                
+                await delay(1000);
+                
+                console.log('Fetching genres...');
+                const res3 = await fetchWithRetry("https://api.jikan.moe/v4/genres/anime");
 
-                //LATEST EPISODES
-                const response2 = await fetch("https://api.jikan.moe/v4/watch/episodes"); //endpoint (for latest episodes)
-                if(!response2.ok) throw new Error(`HTTP ${response2.status}`)
-                    const json2 = await response2.json();
-                    const list2 = Array.isArray(json2.data) ? json2.data : []; // to have a fallback
+                // Check if responses are ok
+                if (!res1.ok) throw new Error(`Top anime API error: ${res1.status}`);
+                if (!res2.ok) throw new Error(`Episodes API error: ${res2.status}`);
+                if (!res3.ok) throw new Error(`Genres API error: ${res3.status}`);
 
-                //GETTING GENRES (FULL LIST)
-                const response3 = await fetch("https://api.jikan.moe/v4/genres/anime")
-                if(!response3.ok) throw new Error(`HTTP ${response3.status}`);
-                    const json3 = await response3.json();
-                    const list3 = Array.isArray(json3.data) ? json3.data : [];
-                 
+                const json1 = await res1.json();
+                const json2 = await res2.json();
+                const json3 = await res3.json();
 
-                    //STORE CACHE 
-                    localStorage.setItem(
-                        CACHE_KEY ,
-                        JSON.stringify({
-                            ts: Date.now(), 
-                            top: list,
-                            latest: list2,
-                            genres: list3
-                        })
-                    );
+                //TO HAVE A FALLBACK
+                const top = Array.isArray(json1.data) ? json1.data : []; 
+                const latest = Array.isArray(json2.data) ? json2.data : []; 
+                const genres = Array.isArray(json3.data) ? json3.data : [];
+
+                //STORE CACHE 
+                localStorage.setItem(
+                    CACHE_KEY ,
+                    JSON.stringify({
+                        ts: Date.now(), 
+                        top,
+                        latest,
+                        genres
+                    })
+                );
 
                 if (!ignored) {
-                    setTopAnime(list)
-                    setLatestEpisode(list2)
-                    setGenres(list3);
+                    setTopAnime(top);
+                    setLatestEpisode(latest);
+                    setGenres(genres);
                 }
             } catch (err) {
-                if (!ignored) setError(err.message || "Failed to load");
+                console.error('Fetch error:', err);
+                
+                // Try to use fallback data from sample storage if available
+                if (!ignored) {
+                    if (err.message.includes('429') || err.message.includes('Rate limited')) {
+                        setError("API rate limit exceeded. Using cached data if available, or try again later.");
+                        
+                        // Use sample data as fallback
+                        if (movies && movies.length > 0) {
+                            setTopAnime(movies.slice(0, 25));
+                            setLatestEpisode(movies.slice(0, 20));
+                            
+                            // Set some default genres
+                            setGenres([
+                                { mal_id: 1, name: 'Action' },
+                                { mal_id: 2, name: 'Adventure' },
+                                { mal_id: 4, name: 'Comedy' },
+                                { mal_id: 8, name: 'Drama' },
+                                { mal_id: 10, name: 'Fantasy' },
+                                { mal_id: 14, name: 'Horror' },
+                                { mal_id: 22, name: 'Romance' },
+                                { mal_id: 24, name: 'Sci-Fi' },
+                                { mal_id: 27, name: 'Shounen' },
+                                { mal_id: 36, name: 'Slice of Life' }
+                            ]);
+                        }
+                    } else {
+                        setError(err.message || "Failed to load data");
+                    }
+                }
             } finally {
                 if (!ignored) setIsLoading(false);
             }
@@ -118,7 +189,6 @@ const Home = () => {
     //TO RESPECT BOTH PAGINATION (RENDERING, SCROLLING/DISPLAYING)
     const limitedMovies = topAnime.slice(0, 10);
     const visibleItems = limitedMovies.slice(startIndex, startIndex + itemsPerPage);
-    const latestEpisodes = latestEpisode.slice(0, 18);
     
     const handleNext = () => {
         if(startIndex + itemsPerPage < topAnime.length) {
@@ -154,15 +224,25 @@ const Home = () => {
         return `hsl${hue}, 60%, 50%`;
     }
 
-    console.log('genres: ',topAnime)
+    const latestEpisodeShowMore = isActive ? latestEpisode.slice(0, 20) : latestEpisode;
+    const genresShowMore = isActive ? genres.slice(0, 20) : genres;
+    
+
     return (
         <div className="min-h-screen ">
             <Navbar />
 
-            {isLoading ? (
-                <LoadingSpinner />
-            ) : (
-                <p className='text-red-200'>{error}</p>
+            {isLoading && <LoadingSpinner />}
+            {error && !isLoading && (
+                <div className="text-center py-8">
+                    <p className='text-red-400 text-lg'>Error: {error}</p>
+                    <button 
+                        onClick={() => window.location.reload()} 
+                        className="mt-4 px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+                    >
+                        Retry
+                    </button>
+                </div>
             )}
 
             {/* Main content with proper spacing for fixed navbar */}
@@ -253,12 +333,15 @@ const Home = () => {
                         <div className="xl:col-span-3">
                             <div className='flex justify-between items-center'>
                                 <h2 className="text-3xl font-bold text-red-600 mb-6">Latest Episode</h2>
-                                <button className='text-white'>Show more</button>
+                                <button className='text-white' 
+                                    onClick={() => setIsActive(!isActive)}>
+                                    {!isActive ? 'Show less' : 'Show more'}
+                                </button>
                             </div>
                             
                             <div className="grid grid-cols-1 2xl:grid-cols-6 xl:grid-cols-6 lg md:grid-cols-4 sm:grid-cols-3 gap-6">
                                 <AnimatePresence initial={false}>
-                                    {latestEpisodes.map((anime, index) => (
+                                    {latestEpisodeShowMore.map((anime, index) => (
                                         <motion.div
                                             initial={{ opacity: 0, y: 20 }}
                                             animate={{ opacity: 1, y: 0 }}
@@ -266,7 +349,7 @@ const Home = () => {
                                             transition={{ duration: 0.3 }}
                                             key={`latest-${index}`}>
                                             <AnimeCard 
-                                                id={anime.mal_id}
+                                                id={anime.entry.mal_id}
                                                 title={anime.entry.title} 
                                                 img={anime.entry.images?.jpg?.image_url}
                                                 description={anime.entry.synopsis}
@@ -284,25 +367,26 @@ const Home = () => {
                         <aside className="hidden xl:block bg-gray-800/60 rounded-lg p-5 border border-gray-700">
                             <h3 className="text-2xl font-bold text-white mb-4">Genres</h3>
                             <div className="grid grid-cols-2 gap-x-8 gap-y-4">
-                                {genres.map((g) => (
+                                {genresShowMore.map((g) => (
                                     <button
                                         key={g.mal_id || g.name}
                                          style={{
-      backgroundColor: genreColors[g.name] || "#95a5a6", // fallback gray
-      color: "white",
-      borderRadius: "8px",
-      padding: "4px 10px",
-      margin: "4px",
-      border: "none",
-      cursor: "pointer",
-    }}
-                                    >
+                                                backgroundColor: genreColors[g.name] || "#95a5a6", // fallback gray
+                                                color: "white",
+                                                borderRadius: "8px",
+                                                padding: "4px 10px",
+                                                margin: "4px",
+                                                border: "none",
+                                                cursor: "pointer",
+                                            }}
+                                            >
                                         {g.name}
                                     </button>
                                 ))}
                             </div>
-                            <button className="mt-6 w-full bg-gray-700/80 hover:bg-gray-600 text-white font-semibold py-3 rounded-md">
-                                Show more
+                            <button className="mt-6 w-full bg-gray-700/80 hover:bg-gray-600 text-white font-semibold py-3 rounded-md"
+                                onClick={() => setIsActive(!isActive)}>
+                                {isActive ? 'Show less' : 'Show more'}
                             </button>
                         </aside>
                     </div>
