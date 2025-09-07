@@ -1,4 +1,5 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, use} from 'react';
+import { Link } from 'react-router-dom';
 import Navbar from '../components/Navbar.jsx';
 import HeroSlider from '../components/HeroSlider.jsx';
 import TrendingAnimeCard from '../components/TrendingAnimeCard.jsx';
@@ -6,6 +7,7 @@ import AnimeCard from '../components/AnimeCard.jsx';
 import {movies} from '../sampleStorage.js';
 import {ChevronLeft, ChevronRight, FastForward, Play} from 'lucide-react';
 import { motion, AnimatePresence } from "framer-motion";
+import {useDebounce} from 'react-use';
 import Footer from '../components/Footer.jsx';
 import LoadingSpinner from '../components/LoadingSpinner.jsx';
 
@@ -15,12 +17,13 @@ const Home = () => {
     const [itemsPerPage, setItemsPerPage] = useState(0);
     const [topAnime, setTopAnime] = useState([]);
     const [latestEpisode, setLatestEpisode] = useState([]);
+    const [animeList, setAnimeList] = useState([]);
     const [genres, setGenres] = useState([]);
     const [isLoading, setIsLoading] = useState(false);
     const [isActive, setIsActive] = useState(false);
     const [genreIsActive, setGenreIsActive] = useState(false);
     const [error, setError] = useState(null);  
-
+    const [searchTerm, setSearchTerm] = useState('');
 
     //ADJUST ITEMS PER PAGE BASED ON SCREEN SIZE
     useEffect(()=> {
@@ -73,13 +76,11 @@ const Home = () => {
         }
         throw new Error('Max retries exceeded');
     };
-
-    useEffect(() =>  {
+    
+    const fetchAnime = async () => {
+        setError(null);
+        setIsLoading(true);
         let ignored = false;
-
-        async function load () {
-            setError(null);
-            setIsLoading(true);
 
             //CHECK CACHE FIRST
             const raw = localStorage.getItem(CACHE_KEY);
@@ -179,18 +180,41 @@ const Home = () => {
             } finally {
                 if (!ignored) setIsLoading(false);
             }
-        }
+    }
 
-        load();
-        return() => {
-            ignored = true;
+    const searchAnime = async (query = [], page = 10) => {
+        try {
+            const response = await fetchWithRetry(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=10&page=${page}`)
+            if (!response.ok) throw new Error(`Top anime API error: ${response.status}`);
+            const json = await response.json();
+            const data = Array.isArray(json.data) ? json.data : []; 
+
+            setAnimeList(data);
         }
+        catch(err) {
+            console.error('Search error', searchTerm, err);
+        }
+    }
+
+    useEffect(() =>  {
+        fetchAnime();
     }, [])  
+
+    //DEBOUNCE SEARCH FUNCTIONALITY
+    const [debounceSearchTerm, setDebounceSearchTerm] = useState('');
+    useDebounce(() => setDebounceSearchTerm(searchTerm), 500, [searchTerm]);
+
+    useEffect(() => {
+        searchAnime(debounceSearchTerm);
+    }, [debounceSearchTerm]);
 
     //TO RESPECT BOTH PAGINATION (RENDERING, SCROLLING/DISPLAYING)
     const limitedMovies = topAnime.slice(0, 10);
     const visibleItems = limitedMovies.slice(startIndex, startIndex + itemsPerPage);
-    
+    const latestEpisodeShowMore = isActive ? latestEpisode : latestEpisode.slice(0, 20);
+    const genresShowMore = genreIsActive ? genres : genres.slice(0, 20);
+
+
     const handleNext = () => {
         if(startIndex + itemsPerPage < topAnime.length) {
             setStartIndex(startIndex + 1);
@@ -225,13 +249,72 @@ const Home = () => {
         return `hsl${hue}, 60%, 50%`;
     }
 
-    const latestEpisodeShowMore = isActive ? latestEpisode : latestEpisode.slice(0, 20);
-    const genresShowMore = genreIsActive ? genres : genres.slice(0, 20);
-    
-
     return (
         <div className="min-h-screen ">
-            <Navbar />
+            <Navbar
+                searchTerm={searchTerm}
+                setSearchTerm={setSearchTerm} />
+
+            {/* Search suggestions dropdown under the header */}
+            {searchTerm && animeList.length > 0 && (
+                <div className="fixed top-16 left-0 right-0 z-40 flex justify-center px-4">
+                    <div className="w-full max-w-2xl bg-[#2f2c33] border border-white/10 rounded-md shadow-2xl overflow-hidden">
+                        {animeList.slice(0, 3).map((item, idx) => {
+                            const subtitle = item.title_english || item.title_japanese || (Array.isArray(item.title_synonyms) ? item.title_synonyms[0] : '');
+                            const airedYear = item.year || (item.aired?.prop?.from?.year ?? '');
+                            const airedMonth = item.aired?.prop?.from?.month ? String(item.aired.prop.from.month).padStart(2, '0') : '';
+                            const airedDay = item.aired?.prop?.from?.day ? String(item.aired.prop.from.day).padStart(2, '0') : '';
+                            const dateText = airedYear ? `${airedMonth && airedDay ? `${airedMonth} ${airedDay}, ` : ''}${airedYear}` : '';
+                            return (
+                                <div key={item.mal_id}>
+                                    <Link
+                                        to={`/details/${item.mal_id}`}
+                                        className="flex items-center gap-3 px-4 py-3 hover:bg-white/5"
+                                        onClick={() => setSearchTerm(item.title)}
+                                    >
+                                        <img
+                                            src={item.images?.jpg?.image_url}
+                                            alt={item.title}
+                                            className="w-12 h-16 object-cover rounded-sm flex-shrink-0"
+                                            loading="lazy"
+                                        />
+                                        <div className="min-w-0">
+                                            <div className="text-white text-sm font-semibold truncate">{item.title}</div>
+                                            {subtitle && (
+                                                <div className="text-gray-300 text-xs truncate">{subtitle}</div>
+                                            )}
+                                            <div className="text-gray-400 text-xs flex items-center gap-2 mt-1">
+                                                {dateText && <span>{dateText}</span>}
+                                                {item.type && (
+                                                    <>
+                                                        <span className="opacity-50">•</span>
+                                                        <span>{item.type}</span>
+                                                    </>
+                                                )}
+                                                {item.duration && (
+                                                    <>
+                                                        <span className="opacity-50">•</span>
+                                                        <span>{item.duration}</span>
+                                                    </>
+                                                )}
+                                            </div>
+                                        </div>
+                                    </Link>
+                                    {idx < Math.min(3, animeList.length) - 1 && (
+                                        <div className="h-px bg-white/10 mx-4" />
+                                    )}
+                                </div>
+                            );
+                        })}
+                        <button
+                            className="w-full text-center bg-amber-300/90 hover:bg-amber-300 text-[#1c1920] font-medium px-4 py-3 flex items-center justify-center gap-2"
+                            onClick={() => window.open(`https://myanimelist.net/anime.php?q=${encodeURIComponent(searchTerm)}`, '_blank')}
+                        >
+                            View all results <span aria-hidden>›</span>
+                        </button>
+                    </div>
+                </div>
+            )}
 
             {isLoading && <LoadingSpinner />}
             {error && !isLoading && (
