@@ -1,9 +1,9 @@
 
 const Result = () => {
     return (
-        <>
+        <div>
         
-        </>
+        </div>
     )
 }
 
