@@ -5,6 +5,7 @@ import Home from './pages/Home.jsx'
 import Navbar from './components/Navbar.jsx'
 import Details from './pages/Details.jsx'
 import StreamingPlatforms from './pages/StreamingPlatforms.jsx';
+import Result from './pages/Result.jsx'
 import './App.css'
 
 function App() {
@@ -17,6 +18,7 @@ function App() {
         <Route path="/home" element={<Home />} />
         <Route path="/details/:id" element={<Details />} />
         <Route path='/streaming/:id' element={ <StreamingPlatforms />} />
+        <Route path='/results' element={<Result />} />
       </Routes>
     </Router>
   )

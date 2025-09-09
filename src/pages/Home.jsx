@@ -182,9 +182,14 @@ const Home = () => {
             }
     }
 
-    const searchAnime = async (query = [], page = 10) => {
+    const searchAnime = async (query = '', page = 1) => {
+        const term = typeof query === 'string' ? query.trim() : '';
+        if (!term) {
+            setAnimeList([]);
+            return;
+        }
         try {
-            const response = await fetchWithRetry(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(query)}&limit=10&page=${page}`)
+            const response = await fetchWithRetry(`https://api.jikan.moe/v4/anime?q=${encodeURIComponent(term)}&limit=10&page=${page}`)
             if (!response.ok) throw new Error(`Top anime API error: ${response.status}`);
             const json = await response.json();
             const data = Array.isArray(json.data) ? json.data : []; 
@@ -192,7 +197,7 @@ const Home = () => {
             setAnimeList(data);
         }
         catch(err) {
-            console.error('Search error', searchTerm, err);
+            console.error('Search error', term, err);
         }
     }
 
@@ -259,7 +264,7 @@ const Home = () => {
             {searchTerm && animeList.length > 0 && (
                 <div className="fixed top-16 left-0 right-0 z-40 flex justify-center px-4">
                     <div className="w-full max-w-2xl bg-[#2f2c33] border border-white/10 rounded-md shadow-2xl overflow-hidden">
-                        {animeList.slice(0, 3).map((item, idx) => {
+                        {animeList.slice(0, 5).map((item, idx) => {
                             const subtitle = item.title_english || item.title_japanese || (Array.isArray(item.title_synonyms) ? item.title_synonyms[0] : '');
                             const airedYear = item.year || (item.aired?.prop?.from?.year ?? '');
                             const airedMonth = item.aired?.prop?.from?.month ? String(item.aired.prop.from.month).padStart(2, '0') : '';
@@ -306,12 +311,12 @@ const Home = () => {
                                 </div>
                             );
                         })}
-                        <button
+                        <Link
                             className="w-full text-center bg-amber-300/90 hover:bg-amber-300 text-[#1c1920] font-medium px-4 py-3 flex items-center justify-center gap-2"
-                            onClick={() => window.open(`https://myanimelist.net/anime.php?q=${encodeURIComponent(searchTerm)}`, '_blank')}
+                            to={`/results?q=${encodeURIComponent(searchTerm)}`}
                         >
                             View all results <span aria-hidden>›</span>
-                        </button>
+                        </Link>
                     </div>
                 </div>
             )}
