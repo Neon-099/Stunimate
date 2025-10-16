@@ -31,7 +31,7 @@ const Navbar = ({searchTerm, setSearchTerm} ) => {
                     <h1 className="text-2xl font-bold text-white">Stu<span className="text-red-500">nimate</span></h1>
                 </Link>
 
-                {/* Center: Search + Watch2gether */}
+                {/* Center: Search + Watch2gether strik saver*/}
                 <div className="flex items-center gap-6 flex-1 justify-center">
                     <div className='flex items-center relative'>
                         <label htmlFor="global-search" className='sr-only'>Search anime</label>
