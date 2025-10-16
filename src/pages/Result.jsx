@@ -5,6 +5,7 @@ import AnimeCard from '../components/AnimeCard.jsx'
 import LoadingSpinner from '../components/LoadingSpinner.jsx'
 
 const Result = () => {
+    //strik saver
     const location = useLocation();
     const navigate = useNavigate();
 
