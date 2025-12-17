@@ -1,13 +1,5 @@
 # 🎌 Stunimate - Anime Streaming Platform
 
-<div align="center">
-  
-  [![React](https://img.shields.io/badge/React-19.1.1-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
-  [![Vite](https://img.shields.io/badge/Vite-7.1.2-646CFF?style=for-the-badge&logo=vite)](https://vitejs.dev/)
-  [![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4.1.12-38B2AC?style=for-the-badge&logo=tailwind-css)](https://tailwindcss.com/)
-  [![Framer Motion](https://img.shields.io/badge/Framer_Motion-12.23.12-0055FF?style=for-the-badge&logo=framer)](https://www.framer.com/motion/)
-</div>
-
 ## 📖 About
 
 **Stunimate** is a modern, responsive anime streaming platform built with React and Vite. Discover trending anime, browse latest episodes, and explore detailed anime information with a sleek, user-friendly interface.
@@ -40,7 +32,7 @@
 
 ```
 
-📬 **Contact**  
+📬 **Contact**
 👤 Niño Emman  
 📧 Email: [Emmannatividad099@gmail.com](mailto:Emmannatividad099@gmail.com)  
 🔗 Portfolio: [portfolio.com //soon ](https://neon-port.netlify.app/) 
