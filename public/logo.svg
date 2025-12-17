@@ -1,0 +1,34 @@
+<svg width="200" height="200" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle with gradient -->
+  <defs>
+    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#dc2626;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#991b1b;stop-opacity:1" />
+    </linearGradient>
+    <linearGradient id="textGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#ffffff;stop-opacity:1" />
+      <stop offset="50%" style="stop-color:#fca5a5;stop-opacity:1" />
+      <stop offset="100%" style="stop-color:#ffffff;stop-opacity:1" />
+    </linearGradient>
+  </defs>
+  
+  <!-- Outer ring -->
+  <circle cx="100" cy="100" r="95" fill="none" stroke="url(#logoGradient)" stroke-width="4"/>
+  
+  <!-- Play button icon (anime streaming theme) -->
+  <path d="M 70 60 L 70 140 L 140 100 Z" fill="url(#logoGradient)"/>
+  
+  <!-- Decorative anime-style sparkles -->
+  <circle cx="50" cy="50" r="3" fill="#dc2626" opacity="0.8">
+    <animate attributeName="opacity" values="0.8;0.3;0.8" dur="2s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="150" cy="50" r="2.5" fill="#dc2626" opacity="0.7">
+    <animate attributeName="opacity" values="0.7;0.2;0.7" dur="1.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="50" cy="150" r="2" fill="#dc2626" opacity="0.6">
+    <animate attributeName="opacity" values="0.6;0.2;0.6" dur="2.5s" repeatCount="indefinite"/>
+  </circle>
+  <circle cx="150" cy="150" r="3" fill="#dc2626" opacity="0.9">
+    <animate attributeName="opacity" values="0.9;0.4;0.9" dur="1.8s" repeatCount="indefinite"/>
+  </circle>
+</svg>
