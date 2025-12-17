@@ -56,7 +56,7 @@ const Landing = () => {
                             <div className='rounded-xl overflow-hidden ring-1 ring-white/10 shadow-2xl'>
                                 <img
                                     className='w-full h-full object-cover'
-                                    src="https://aniwatchtv.to/images/anw-min.webp"
+                                    src="./stunimates.png"
                                     alt="Showcase"
                                 />
                             </div>
