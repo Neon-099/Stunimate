@@ -1,7 +1,6 @@
 # 🎌 Stunimate - Anime Streaming Platform
 
 <div align="center">
-  <img src="src/assets/anw-min.webp" alt="Stunimate Logo" width="200"/>
   
   [![React](https://img.shields.io/badge/React-19.1.1-61DAFB?style=for-the-badge&logo=react)](https://reactjs.org/)
   [![Vite](https://img.shields.io/badge/Vite-7.1.2-646CFF?style=for-the-badge&logo=vite)](https://vitejs.dev/)
